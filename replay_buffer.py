@@ -42,55 +42,37 @@ class Experience:
 def split_experience_batch(experience: Experience) -> list[Experience]:
     batch_size = experience.sequences.size(0)
     batch_data = [{} for _ in range(batch_size)]
-    keys = (
-        "sequences",
-        "action_log_probs",
-        "log_probs_ref",
-        "returns",
-        "advantages",
-        "attention_mask",
-        "action_mask",
-    )
-    for key in keys:
-        value = getattr(experience, key)
+    for field in fields(experience):
+        value = getattr(experience, field.name)
         if value is None:
             vals = [None] * batch_size
         else:
             vals = torch.unbind(value)
         assert batch_size == len(vals)
         for i, v in enumerate(vals):
-            batch_data[i][key] = v
+            batch_data[i][field.name] = v
 
     return [Experience(**data) for data in batch_data]
 
 
 def join_experience_batch(items: list[Experience]) -> Experience:
     batch_data = {}
-    keys = (
-        "sequences",
-        "action_log_probs",
-        "log_probs_ref",
-        "returns",
-        "advantages",
-        "attention_mask",
-        "action_mask",
-    )
-    for key in keys:
-        vals = [getattr(item, key) for item in items]
+    for field in fields(Experience):
+        vals = [getattr(item, field.name) for item in items]
         if all(v is not None for v in vals):
             data = zero_pad_sequences(vals, "left")
         else:
             data = None
-        batch_data[key] = data
+        batch_data[field.name] = data
     return Experience(**batch_data)
 
 
 class ReplayBuffer:
-    def __init__(self, limit: int = 0) -> None:
+    def __init__(self, limit: int = 0):
         self.limit = limit
         self.items: list[Experience] = []
 
-    def append(self, experience: Experience) -> None:
+    def append(self, experience: Experience):
         items = split_experience_batch(experience)
         self.items.extend(items)
         if self.limit > 0:

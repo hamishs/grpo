@@ -1,4 +1,5 @@
 from typing import Optional
+
 import torch
 import torch.nn as nn
 
@@ -11,7 +12,8 @@ def approx_kl_divergence(
     action_mask: Optional[torch.Tensor],
 ) -> torch.Tensor:
     """
-    Monte-Carlo approximation of KL divergence, k3 estimator, see: http://joschu.net/blog/kl-approx.html
+    Monte-Carlo approximation of KL divergence, k3 estimator,
+    see: http://joschu.net/blog/kl-approx.html
     """
 
     log_ratio = log_probs_ref.float() - log_probs.float()
