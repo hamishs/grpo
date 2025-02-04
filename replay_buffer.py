@@ -38,6 +38,9 @@ class Experience:
             members[field.name] = v
         return Experience(**members)
 
+    def cpu(self) -> Self:
+        return self.to(torch.device("cpu"))
+
 
 def split_experience_batch(experience: Experience) -> list[Experience]:
     batch_size = experience.sequences.size(0)
