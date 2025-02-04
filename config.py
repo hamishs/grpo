@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import torch
+import yaml
 
 
 class Config:
@@ -8,7 +9,7 @@ class Config:
     wandb_project = None
     device_index = 0
     model_name = "meta-llama/Llama-3.2-1B-Instruct"
-    checkpoint_path = Path("./output")
+    checkpoint_path = "./output"
     checkpoint_interval = 20
     train_batch_size = 16
     lr = 5e-6
@@ -25,12 +26,35 @@ class Config:
     top_p = 1.0
     temperature = 1.0
 
-    device = (
-        torch.device("cuda", device_index)
-        if torch.cuda.is_available()
-        else torch.device("cpu")
-    )
-
     @classmethod
     def from_dict(cls, data: dict):
         return cls(**data)
+
+    @classmethod
+    def from_yaml(cls, path: Path):
+        with open(path, "r") as f:
+            data = yaml.safe_load(f)
+        return cls.from_dict(data)
+
+    def __init__(self, **kwargs):
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+        self.device = (
+            torch.device("cuda", self.device_index)
+            if torch.cuda.is_available()
+            else torch.device("cpu")
+        )
+
+    def to_dict(self):
+        return {
+            key: getattr(self, key)
+            for key in Config.__dict__.keys()
+            if not key.startswith("__") and hasattr(self, key)
+            and not callable(getattr(self, key))
+        }
+
+    def to_yaml(self, path: Path):
+        with open(path, "w") as f:
+            yaml.dump(self.to_dict(), f)
+
