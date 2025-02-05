@@ -50,11 +50,11 @@ class Config:
         return {
             key: getattr(self, key)
             for key in Config.__dict__.keys()
-            if not key.startswith("__") and hasattr(self, key)
+            if not key.startswith("__")
+            and hasattr(self, key)
             and not callable(getattr(self, key))
         }
 
     def to_yaml(self, path: Path):
         with open(path, "w") as f:
             yaml.dump(self.to_dict(), f)
-

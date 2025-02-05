@@ -3,12 +3,11 @@ import re
 import torch
 import torch.nn.functional as F
 import wandb
+from loss import approx_kl_divergence
+from replay_buffer import Experience, join_experience_batch
 from torch.nn.utils import clip_grad_norm_
 from torch.utils.data import DataLoader
 from transformers import GenerationConfig, LlamaForCausalLM, PreTrainedTokenizer
-
-from loss import approx_kl_divergence
-from replay_buffer import Experience, join_experience_batch
 
 # DeepSeek Zero system prompt
 SYSTEM_PROMPT = """A conversation between User and Assistant. The user asks a \
