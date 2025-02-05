@@ -27,22 +27,25 @@ def read_jsonl(file_name: str | Path) -> Iterator:
             yield json.loads(line)
 
 
+def load_tokenizer(model_name_or_path: str) -> PreTrainedTokenizer:
+    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
+    tokenizer.pad_token = tokenizer.eos_token
+    return tokenizer
+
+
 def load_model(
     model_name_or_path: str,
     trust_remote_code: bool = False,
     bf16: bool = True,
     device_map=None,
-) -> tuple[LlamaForCausalLM, PreTrainedTokenizer]:
-    tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
-    tokenizer.pad_token = tokenizer.eos_token
-    model = LlamaForCausalLM.from_pretrained(
+) -> LlamaForCausalLM:
+    return LlamaForCausalLM.from_pretrained(
         model_name_or_path,
         trust_remote_code=trust_remote_code,
         attn_implementation="flash_attention_2",
         torch_dtype=torch.bfloat16 if bf16 else "auto",
         device_map=device_map,
     )
-    return model, tokenizer
 
 
 def main():
@@ -50,8 +53,9 @@ def main():
     seed_all(config.seed)
     device = config.device
 
-    reference_model, _ = load_model(config.model_name, device_map=device)
-    model, tokenizer = load_model(config.model_name, device_map=device)
+    tokenizer = load_tokenizer(config.model_name)
+    reference_model = load_model(config.model_name, device_map=device)
+    model = load_model(config.model_name, device_map=device)
     optimizer = optim.Adam(model.parameters(), lr=config.lr)
 
     reference_model.eval()
@@ -96,13 +100,7 @@ def main():
             device,
             optimizer,
             objective,
-            config.group_size,
-            config.max_length,
-            config.temperature,
-            config.top_p,
-            config.train_batch_size,
-            config.epochs_per_step,
-            config.max_norm,
+            config,
         )
 
         if (
