@@ -7,12 +7,13 @@ from typing import Iterator
 import torch
 import torch.optim as optim
 import wandb
-from config import Config
-from loss import GRPOLoss
-from replay_buffer import ReplayBuffer
 from torch.utils.data import DataLoader
-from train import train_batch
 from transformers import AutoTokenizer, LlamaForCausalLM, PreTrainedTokenizer
+
+from grpo.config import Config
+from grpo.loss import GRPOLoss
+from grpo.replay_buffer import ReplayBuffer
+from grpo.train import train_batch
 
 
 def seed_all(seed: int) -> torch.Generator:

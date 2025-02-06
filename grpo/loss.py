@@ -2,7 +2,8 @@ from typing import Optional
 
 import torch
 import torch.nn as nn
-from replay_buffer import Experience
+
+from grpo.replay_buffer import Experience
 
 
 def approx_kl_divergence(

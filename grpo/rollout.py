@@ -2,9 +2,10 @@ import re
 
 import torch
 import torch.nn.functional as F
-from loss import approx_kl_divergence
-from replay_buffer import Experience
 from transformers import GenerationConfig, LlamaForCausalLM, PreTrainedTokenizer
+
+from grpo.loss import approx_kl_divergence
+from grpo.replay_buffer import Experience
 
 
 @torch.no_grad()
@@ -93,7 +94,7 @@ def rollout(
 def prepare_model_inputs(
     task: str,
     tokenizer: PreTrainedTokenizer,
-    device: torch.Device,
+    device: torch.device,
 ) -> torch.Tensor:
     # DeepSeek Zero system prompt
     SYSTEM_PROMPT = """A conversation between User and Assistant. The user asks a \
